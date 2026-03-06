@@ -1,0 +1,58 @@
+# Cenário 3: Nginx com Local Path Provisioner (Dinâmico)
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nginx-dynamic-pvc
+spec:
+  storageClassName: local-path
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-dynamic
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx-dynamic
+  template:
+    metadata:
+      labels:
+        app: nginx-dynamic
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:alpine
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: dynamic-storage
+          mountPath: /usr/share/nginx/html
+      volumes:
+      - name: dynamic-storage
+        persistentVolumeClaim:
+          claimName: nginx-dynamic-pvc
+      initContainers:
+      - name: setup
+        image: busybox
+        command: ['sh', '-c', 'echo "<h1>Nginx Dynamic Provisioning</h1>" > /html/index.html']
+        volumeMounts:
+        - name: dynamic-storage
+          mountPath: /html
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-dynamic-svc
+spec:
+  selector:
+    app: nginx-dynamic
+  ports:
+  - port: 80
+  type: NodePort

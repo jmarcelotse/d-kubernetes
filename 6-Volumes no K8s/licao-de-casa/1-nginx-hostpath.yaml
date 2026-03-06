@@ -1,0 +1,73 @@
+# Cenário 1: Nginx com hostPath
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nginx-hostpath-pv
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: manual
+  hostPath:
+    path: /tmp/nginx-data
+    type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nginx-hostpath-pvc
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 500Mi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-hostpath
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx-hostpath
+  template:
+    metadata:
+      labels:
+        app: nginx-hostpath
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:alpine
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: html-storage
+          mountPath: /usr/share/nginx/html
+      volumes:
+      - name: html-storage
+        persistentVolumeClaim:
+          claimName: nginx-hostpath-pvc
+      initContainers:
+      - name: setup
+        image: busybox
+        command: ['sh', '-c', 'echo "<h1>Nginx hostPath</h1>" > /html/index.html']
+        volumeMounts:
+        - name: html-storage
+          mountPath: /html
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-hostpath-svc
+spec:
+  selector:
+    app: nginx-hostpath
+  ports:
+  - port: 80
+  type: NodePort

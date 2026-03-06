@@ -1,0 +1,23 @@
+# Terraform
+.terraform/
+.terraform.lock.hcl
+terraform.tfstate
+terraform.tfstate.backup
+*.tfvars
+!terraform.tfvars.example
+
+# Crash logs
+crash.log
+crash.*.log
+
+# SSH keys
+*.pem
+*.pub
+
+# Inventário gerado
+inventory.ini
+hosts-k8s.txt
+
+# Backup files
+*.bak
+*~

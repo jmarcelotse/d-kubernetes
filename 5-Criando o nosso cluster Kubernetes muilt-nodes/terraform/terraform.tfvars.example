@@ -1,0 +1,23 @@
+# Exemplo de arquivo terraform.tfvars
+# Copie este arquivo e ajuste os valores conforme necessário
+
+# Região AWS
+aws_region = "us-east-1"
+
+# Nome do cluster
+cluster_name = "k8s-cluster"
+
+# Quantidade de nós
+master_count = 2
+worker_count = 3
+
+# Tipo de instâncias
+master_instance_type = "t3.medium"
+worker_instance_type = "t3.medium"
+
+# Caminho para chave SSH pública
+public_key_path = "~/.ssh/id_rsa.pub"
+
+# CIDRs (opcional - já tem valores padrão)
+# vpc_cidr    = "10.0.0.0/16"
+# subnet_cidr = "10.0.1.0/24"

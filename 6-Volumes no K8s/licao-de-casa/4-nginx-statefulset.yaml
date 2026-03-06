@@ -1,0 +1,53 @@
+# Cenário 4: Nginx StatefulSet
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-stateful
+spec:
+  ports:
+  - port: 80
+  clusterIP: None
+  selector:
+    app: nginx-stateful
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: nginx-stateful
+spec:
+  serviceName: nginx-stateful
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx-stateful
+  template:
+    metadata:
+      labels:
+        app: nginx-stateful
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:alpine
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: www
+          mountPath: /usr/share/nginx/html
+      initContainers:
+      - name: setup
+        image: busybox
+        command: ['sh', '-c', 'echo "<h1>StatefulSet Pod: $(hostname)</h1>" > /html/index.html']
+        volumeMounts:
+        - name: www
+          mountPath: /html
+  volumeClaimTemplates:
+  - metadata:
+      name: www
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      storageClassName: local-path
+      resources:
+        requests:
+          storage: 1Gi
