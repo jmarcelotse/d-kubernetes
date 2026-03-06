@@ -1,0 +1,73 @@
+# Cenário 2: Nginx com NFS
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nginx-nfs-pv
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: nfs
+  nfs:
+    server: 192.168.1.100  # Ajustar IP
+    path: /exports/nginx
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nginx-nfs-pvc
+spec:
+  storageClassName: nfs
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-nfs
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx-nfs
+  template:
+    metadata:
+      labels:
+        app: nginx-nfs
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:alpine
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: nfs-storage
+          mountPath: /usr/share/nginx/html
+      volumes:
+      - name: nfs-storage
+        persistentVolumeClaim:
+          claimName: nginx-nfs-pvc
+      initContainers:
+      - name: setup
+        image: busybox
+        command: ['sh', '-c', 'echo "<h1>Nginx NFS - Pod: $(hostname)</h1>" > /html/index.html']
+        volumeMounts:
+        - name: nfs-storage
+          mountPath: /html
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-nfs-svc
+spec:
+  selector:
+    app: nginx-nfs
+  ports:
+  - port: 80
+  type: NodePort
