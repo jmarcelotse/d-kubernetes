@@ -76,10 +76,10 @@ exit
 
 ```bash
 # Criar container com volume montado
-docker run -d -v $(pwd)/data:/data --name app-data nginx
+docker run -d -v "$(pwd)/data:/data" --name app-data nginx
 
-# Criar arquivo no host
-echo "Hello from host" > data/test.txt
+# Criar arquivo no host (sudo porque o Docker cria o diretório como root)
+sudo bash -c 'echo "Hello from host" > data/test.txt'
 
 # Ver arquivo dentro do container
 docker exec app-data cat /data/test.txt
