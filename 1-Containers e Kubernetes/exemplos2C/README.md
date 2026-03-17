@@ -10,11 +10,36 @@ Demonstra como montar uma stack completa (Frontend + API + Banco de Dados) usand
                     app-network
 ```
 
+## Estrutura
+
+```
+exemplos2C/
+├── api/
+│   ├── Dockerfile
+│   └── server.js
+├── frontend/
+│   ├── Dockerfile
+│   └── index.html
+└── README.md
+```
+
 ## Pré-requisitos
 
 - Docker instalado e rodando
 
 ## Passo a passo
+
+### 0. Construir as imagens
+
+```bash
+cd exemplos2C
+
+# Build da API
+docker build -t myapi:v1 ./api
+
+# Build do Frontend
+docker build -t myfrontend:v1 ./frontend
+```
 
 ### 1. Criar a rede
 
@@ -45,8 +70,6 @@ docker run -d \
   myapi:v1
 ```
 
-> **Nota:** A imagem `myapi:v1` precisa ser construída previamente. Caso não tenha, substitua por uma imagem de teste como `nginx` para validar a rede.
-
 ### 4. Executar o frontend
 
 ```bash
@@ -57,8 +80,6 @@ docker run -d \
   -p 80:80 \
   myfrontend:v1
 ```
-
-> **Nota:** A imagem `myfrontend:v1` precisa ser construída previamente. Caso não tenha, substitua por `nginx` para validar.
 
 ### 5. Verificar os containers rodando
 
